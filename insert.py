@@ -1,7 +1,7 @@
 import psycopg2, configparser
 
 config = configparser.ConfigParser()
-config.read('.env')
+config.read('.cfg')
 
 # Connect to the PostgreSQL database
 connection = psycopg2.connect(
