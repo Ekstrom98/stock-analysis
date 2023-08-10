@@ -50,16 +50,10 @@ if selection_option == "Filter Data":
 
     query = \
     f"""
-    WITH name_screening AS
+    WITH roa_screening AS 
     (
     SELECT * 
-    FROM company_data
-    WHERE LOWER(company_name) LIKE LOWER('%{company_name}%')
-    ),
-    roa_screening AS 
-    (
-    SELECT * 
-    FROM name_screening 
+    FROM company_data 
     WHERE return_on_assets >= {roa}
     )
     SELECT company_name Name, company_symbol Symbol, sector Sector, ROUND(return_on_assets*100, 1) ROA, ROUND(current_pe,1) PE
@@ -71,17 +65,40 @@ if selection_option == "Filter Data":
     result = ps.sqldf(query, locals())
     if magic_option == 'Yes':
         result = magic_formula(df = result, roa_col = 'ROA', pe_col = 'PE')
+
+    if company_name != '':
+        name_query = \
+                f"""
+                SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
+                FROM result
+                WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
+                ORDER BY "Magic Score" DESC;
+                """
+        result = ps.sqldf(name_query, locals())
+
     st.dataframe(result)
 else:
+    
     query = \
     f"""
     SELECT company_name Name, company_symbol Symbol, sector Sector, ROUND(return_on_assets*100,1) ROA, ROUND(current_pe,1) PE
     FROM company_data
-    WHERE LOWER(company_name) LIKE LOWER('%{company_name}%')
     ORDER BY company_name;
     """
 
     result = ps.sqldf(query, locals())
+
     if magic_option == 'Yes':
         result = magic_formula(df = result, roa_col = 'ROA', pe_col = 'PE')
+    if company_name != '':
+        name_query = \
+                f"""
+                SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
+                FROM result
+                WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
+                ORDER BY "Magic Score" DESC;
+                """
+        result = ps.sqldf(name_query, locals())
     st.dataframe(result)
+
+st.markdown("---")
