@@ -28,7 +28,7 @@ def backup_data():
                     else:
                         print(f"The table {table} has been successfully copied.")
                         print("Number of records copied:")
-                        #print(result.stdout.decode().split('COPY ')[1])
+                        print(result.stdout.decode().split('COPY ')[1])
 
             except Exception as e:
                  print(f"Command skipped: {str(e)}")
