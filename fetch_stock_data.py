@@ -22,15 +22,19 @@ cursor = connection.cursor()
 df = pd.read_csv("backups/companies.csv",usecols=[0, 1, 2], header=None)
 df.columns = ['ID', 'Company Name', 'Symbol']
 
+def check_if_value_exists(company_symbol):
+    query = """SELECT COUNT(*) FROM companies WHERE company_symbol = %s"""
+    cursor.execute(query, (company_symbol))
+    results = bool(cursor.fetchone()[0])
+    return results
+
+symbol_errors = []
 for symbol in df.Symbol:
     try:
         stock = yf.Ticker(symbol)
         print("Looking at " + symbol)
         try:
             company_name = stock.info['shortName']
-            #if "'" in company_name:
-                #company_name = company_name.replace("'","''")
-                #print(company_name)
         except:
             company_name = None
         
@@ -95,6 +99,7 @@ for symbol in df.Symbol:
         #cursor.execute(query)
         print("Insertion of data from stock " + company_name + " completed.")
     except Exception as e:
+        symbol_errors.append(symbol)
         print("Error: " + str(e))
 
 connection.commit()
