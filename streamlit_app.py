@@ -37,7 +37,7 @@ if option == "Filter Data":
     FROM name_screening 
     WHERE return_on_assets >= {roa}
     )
-    SELECT company_name Name, company_symbol Symbol, sector Sector, ROUND(return_on_assets*100,1) ROA, ROUND(current_pe,1) PE, market_cap 'Market Cap'
+    SELECT company_name Name, company_symbol Symbol, sector Sector, ROUND(return_on_assets*100,1) ROA, ROUND(current_pe,1) PE
     FROM roa_screening
     WHERE current_pe >= {pe}
     ORDER BY current_pe;
@@ -49,7 +49,7 @@ if option == "Filter Data":
 else:
     query = \
     f"""
-    SELECT company_name Name, company_symbol Symbol, sector Sector, ROUND(return_on_assets*100,1) ROA, ROUND(current_pe,1) PE, market_cap 'Market Cap'
+    SELECT company_name Name, company_symbol Symbol, sector Sector, ROUND(return_on_assets*100,1) ROA, ROUND(current_pe,1) PE
     FROM company_data
     WHERE LOWER(company_name) LIKE LOWER('%{company_name}%')
     ORDER BY company_name;

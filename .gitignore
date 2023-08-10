@@ -3,5 +3,5 @@ test.py
 .env
 companies
 companies_not_in_db.py
-backups
+backups/companies.csv
 .cfg
