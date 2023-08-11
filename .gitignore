@@ -5,3 +5,5 @@ companies
 companies_not_in_db.py
 backups/companies.csv
 .cfg
+__pycache__
+*.pdf
