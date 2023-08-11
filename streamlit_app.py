@@ -1,9 +1,12 @@
 import streamlit as st
 import pandas as pd
 import pandasql as ps
+from helper_functions import search_stock
+from generate_report import generate_report
 # python -m streamlit run streamlit_app.py
 
 def magic_formula(df: pd.DataFrame, roa_col: str, pe_col: str) -> pd.DataFrame:
+    df.dropna(inplace=True, subset=[roa_col, pe_col])
     df_roa_sorted = df.sort_values(by=roa_col, ascending=True)
     df_roa_sorted.reset_index(inplace=True, drop=True)
 
@@ -18,7 +21,8 @@ def magic_formula(df: pd.DataFrame, roa_col: str, pe_col: str) -> pd.DataFrame:
     df_magic = df_pe_sorted.copy()
     df_magic['Magic Score'] = df_magic['pe_score'] + df_magic['roa_score']
     df_magic = df_magic.sort_values(by='Magic Score', ascending=False)
-    df_magic.dropna(inplace=True, subset=[roa_col, pe_col])
+    
+
     df_magic.drop(inplace=True, columns=['pe_score', 'roa_score'])
     df_magic.reset_index(inplace=True, drop=True)
     
@@ -35,6 +39,7 @@ st.markdown("---")
 company_data = pd.read_csv('./backups/company_data.csv',usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], header=None)
 company_data.columns = ['id', 'company_name', 'company_symbol', 'industry', 'sector', 'full_time_employees',
                         'return_on_assets', 'return_on_equity', 'market_cap', 'current_price', 'trailing_eps', 'current_pe']
+
 col1, col2 = st.columns(2)
 with col1:
     selection_option = st.radio("Choose an option:", ["Show All", "Filter Data"], index=0)
@@ -100,5 +105,8 @@ else:
                 """
         result = ps.sqldf(name_query, locals())
     st.dataframe(result)
+st.write(f"Based on your current selections, there are {len(result)} results.")
+st.button("Generate Report", on_click=generate_report(result, "magic_stock_analysis.pdf"))
+
 
 st.markdown("---")
