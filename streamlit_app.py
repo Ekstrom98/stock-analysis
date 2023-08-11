@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import pandasql as ps
-from helper_functions import search_stock
 from generate_report import generate_report
 # python -m streamlit run streamlit_app.py
 
