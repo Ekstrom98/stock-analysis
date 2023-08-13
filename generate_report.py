@@ -1,13 +1,16 @@
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer#, TableOfContents
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.lib.enums import TA_CENTER
 import pandas as pd
+from io import BytesIO
 
-def generate_report(df: pd.DataFrame, filename: str):
+def generate_report(df: pd.DataFrame):
+    buffer = BytesIO()
 
     # Create a new document
-    doc = SimpleDocTemplate(filename, pagesize=letter)
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
     story = []
 
     # Styles
@@ -38,23 +41,7 @@ def generate_report(df: pd.DataFrame, filename: str):
     summary = Paragraph("Your summary content here...", desc_style)
     story.append(summary)
 
-    # Table of Contents
-    #toc = TableOfContents()
-    #toc.levelStyles = [
-    #     ParagraphStyle(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20),
-    #     ParagraphStyle(fontSize=12, name='TOCHeading2', leftIndent=40)
-    # ]
-
-    #story.append(toc)
-
     # Build the PDF
     doc.build(story)
-
-# Example usage
-df = pd.DataFrame({
-    'Name': ['Alice', 'Bob', 'Charlie'],
-    'Age': [25, 30, 35],
-    'City': ['New York', 'San Francisco', 'Los Angeles']
-})
-
-generate_report(df, "magic_stock_analysis.pdf")
+    buffer.seek(0)
+    return buffer
