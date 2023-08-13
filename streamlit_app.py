@@ -105,7 +105,13 @@ else:
         result = ps.sqldf(name_query, locals())
     st.dataframe(result)
 st.write(f"Based on your current selections, there are {len(result)} results.")
-st.button("Generate Report", on_click=generate_report(result, "magic_stock_analysis.pdf"))
 
+pdf_buffer = generate_report(result)
+st.download_button(
+    label="Generate Report",
+    data=pdf_buffer,
+    file_name="magic_stock_analysis.pdf",
+    mime="application/pdf"
+)
 
 st.markdown("---")
