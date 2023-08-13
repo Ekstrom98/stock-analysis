@@ -6,7 +6,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from io import BytesIO
-# python -m streamlit run streamlit_app.py
 
 # Function to calculate the magic score for stocks based on ROA and P/E ratio
 def magic_formula(df: pd.DataFrame, roa_col: str, pe_col: str) -> pd.DataFrame:
