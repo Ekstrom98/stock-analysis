@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
 import pandasql as ps
-from generate_report import generate_report
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
+from io import BytesIO
 # python -m streamlit run streamlit_app.py
 
 def magic_formula(df: pd.DataFrame, roa_col: str, pe_col: str) -> pd.DataFrame:
@@ -70,15 +74,38 @@ if selection_option == "Filter Data":
     if magic_option == 'Yes':
         result = magic_formula(df = result, roa_col = 'ROA', pe_col = 'PE')
 
-    if company_name != '':
-        name_query = \
-                f"""
-                SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
-                FROM result
-                WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
-                ORDER BY "Magic Score" DESC;
-                """
-        result = ps.sqldf(name_query, locals())
+        if company_name != '':
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
+                    FROM result
+                    WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
+                    ORDER BY "Magic Score" DESC;
+                    """
+        else:
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
+                    FROM result
+                    ORDER BY "Magic Score" DESC;
+                    """
+    else:
+        if company_name != '':
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE
+                    FROM result
+                    WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
+                    ORDER BY Name DESC;
+                    """
+        else:
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE
+                    FROM result
+                    ORDER BY Name DESC;
+                    """
+    result = ps.sqldf(name_query, locals())
 
     st.dataframe(result)
 else:
@@ -106,10 +133,63 @@ else:
     st.dataframe(result)
 st.write(f"Based on your current selections, there are {len(result)} results.")
 
-pdf_buffer = generate_report(result)
+#----------------------------GENERATE REPORT----------------------------#
+buffer = BytesIO()
+# Create a new document
+doc = SimpleDocTemplate(buffer, pagesize=letter)
+story = []
+
+# Styles
+styles = getSampleStyleSheet()
+title_style = styles['Heading1']
+title_style.alignment = TA_CENTER  # Set the alignment to center
+desc_style = styles['BodyText']
+
+# Title
+title = Paragraph("Magic Stock Analysis", title_style)
+story.append(title)
+story.append(Spacer(1, 12))
+
+# Description
+if selection_option == 'Show All':
+    if magic_option == 'Yes':
+        desc = f"This report is based on your selection to show all records and include a magic score.\
+                Below you'll find a table with {len(result)} records ordered by their magic score in descending order."
+    else:
+        desc = f"This report is based on your selection to show all records and not include a magic score.\
+                Below you'll find a table with {len(result)} records ordered by their magic score in descending order."
+else:
+    if magic_option == 'Yes':
+        desc = f"This report is based on your selection to filter records and include a magic score.\
+                Below you'll find a table with {len(result)} records ordered by their magic score in descending order. \
+                Based on your applied filters, only records with a return on assets greater than or equal to {roa*100}% \
+                and a P/E-ratio greater than or equal to {pe} are included."
+    else:
+        desc = f"This report is based on your selection to show all records and not include a magic score.\
+                elow you'll find a table with {len(result)} records ordered by their magic score in descending order. \
+                Based on your applied filters, only records with a return on assets greater than or equal to {roa*100}% \
+                and a P/E-ratio greater than or equal to {pe} are included."
+
+description = Paragraph(desc, desc_style)
+story.append(description)
+story.append(Spacer(1, 12))
+
+# Table (Assuming df is your DataFrame)
+data = [result.columns.tolist()] + result.values.tolist()
+table = Table(data)
+table_style = TableStyle([('BACKGROUND', (0, 0), (-1, 0), '#E5E4E2')])
+table.setStyle(table_style)
+story.append(table)
+story.append(Spacer(1, 12))
+
+# Build the PDF
+doc.build(story)
+buffer.seek(0)
+
+
 st.download_button(
     label="Generate Report",
-    data=pdf_buffer,
+    data=buffer,
     file_name="magic_stock_analysis.pdf",
     mime="application/pdf"
 )
