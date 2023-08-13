@@ -90,9 +90,10 @@ st.title("Stock Analysis")
 st.markdown("---")
 
 # Read the data into a DataFrame
-company_data = pd.read_csv('./backups/company_data.csv',usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], header=None)
+company_data = pd.read_csv('./backups/company_data.csv',usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], header=None)
 company_data.columns = ['id', 'company_name', 'company_symbol', 'industry', 'sector', 'full_time_employees',
-                        'return_on_assets', 'return_on_equity', 'market_cap', 'current_price', 'trailing_eps', 'current_pe']
+                        'return_on_assets', 'return_on_equity', 'market_cap', 'current_price', 'trailing_eps',
+                        'current_pe', 'business_summary']
 
 # Radio buttons for user options
 col1, col2 = st.columns(2)
