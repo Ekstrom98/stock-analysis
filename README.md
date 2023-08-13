@@ -20,7 +20,7 @@ A stock analysis tool designed to fetch and analyze stock data from various sour
 
 1. **Clone the Repository**:
    \```
-   git clone [repository-url]
+   git clone https://github.com/Ekstrom98/stock-analysis.git
    cd stock-analysis-main
    \```
 
