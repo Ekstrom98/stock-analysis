@@ -88,14 +88,19 @@ for symbol in df.Symbol:
         except:
             current_pe = None
         
+        try:
+            business_summary = stock.info['longBusinessSummary']
+        except:
+            business_summary = None
+        
         query = """
                 INSERT INTO company_data 
                 (company_name, company_symbol, industry, sector, full_time_employees, return_on_assets, 
-                return_on_equity, market_cap, current_price, trailing_eps, current_pe)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                return_on_equity, market_cap, current_price, trailing_eps, current_pe, business_summary)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
 
-        cursor.execute(query, (company_name, symbol, industry, sector, fte, return_on_assets, return_on_equity, market_cap, current_price, trailing_earnings_per_share, current_pe))
+        cursor.execute(query, (company_name, symbol, industry, sector, fte, return_on_assets, return_on_equity, market_cap, current_price, trailing_earnings_per_share, current_pe, business_summary))
         #cursor.execute(query)
         print("Insertion of data from stock " + company_name + " completed.")
     except Exception as e:
