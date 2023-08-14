@@ -2,6 +2,7 @@ import psycopg2, configparser
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import subprocess
 
 config = configparser.ConfigParser()
 config.read('.cfg')
@@ -28,6 +29,9 @@ def check_if_value_exists(company_symbol):
     results = bool(cursor.fetchone()[0])
     return results
 
+truncate_query = """TRUNCATE TABLE company_data"""
+cursor.execute(truncate_query)
+connection.commit()
 symbol_errors = []
 for symbol in df.Symbol:
     try:
@@ -101,7 +105,7 @@ for symbol in df.Symbol:
                 """
 
         cursor.execute(query, (company_name, symbol, industry, sector, fte, return_on_assets, return_on_equity, market_cap, current_price, trailing_earnings_per_share, current_pe, business_summary))
-        #cursor.execute(query)
+        
         print("Insertion of data from stock " + company_name + " completed.")
     except Exception as e:
         symbol_errors.append(symbol)
@@ -110,5 +114,7 @@ for symbol in df.Symbol:
 connection.commit()
 cursor.close()
 connection.close()
+
+subprocess.run(['python3', 'backup_data.py'], check=True)
 
 print("Finished.")
