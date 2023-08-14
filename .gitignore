@@ -7,3 +7,4 @@ backups/companies.csv
 .cfg
 __pycache__
 *.pdf
+dags
