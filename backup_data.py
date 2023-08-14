@@ -32,4 +32,15 @@ def backup_data():
 
             except Exception as e:
                  print(f"Command skipped: {str(e)}")
+
+        # Add the 'backups' folder to the staging area
+        subprocess.run(['git', 'add', 'backups'], check=True)
+
+        # Commit the changes
+        commit_message = "Refreshed data"
+        subprocess.run(['git', 'commit', '-m', commit_message], check=True)
+
+        # Push the changes
+        subprocess.run(['git', 'push', 'origin', 'main'], check=True)
+
 backup_data()
