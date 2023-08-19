@@ -1,19 +1,8 @@
 import psycopg2, configparser, requests
 from bs4 import BeautifulSoup
+from utilities.db_utils import connect_to_database
 
-config = configparser.ConfigParser()
-config.read('.cfg')
-try:
-    # Connect to the PostgreSQL database
-    connection = psycopg2.connect(
-        dbname=config['POSTGRES']['POSTGRES_DB'],
-        user=config['POSTGRES']['POSTGRES_USER'],
-        password=config['POSTGRES']['POSTGRES_PASSWORD'],
-        host=config['POSTGRES']['HOST']
-    )
-    print("Connection successful.")
-except Exception as e:
-    print("Connection unsuccessful. Error: " + str(e))
+connection = connect_to_database()
 
 sp_500 = config['STOCK INDICES']['SP500']
 
