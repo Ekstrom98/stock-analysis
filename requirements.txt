@@ -1,9 +1,0 @@
-beautifulsoup4==4.11.2
-numpy==1.25.2
-pandas==2.0.3
-pandasql==0.7.3
-psycopg2_binary==2.9.7
-reportlab==4.0.4
-Requests==2.31.0
-streamlit==1.25.0
-yfinance==0.2.27
