@@ -1,9 +1,7 @@
 venv
+backups
 test.py
 .env
-backups
 .cfg
 __pycache__
 *.pdf
-dags
-backups
