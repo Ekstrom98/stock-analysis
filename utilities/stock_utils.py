@@ -34,3 +34,45 @@ def magic_formula(df: pd.DataFrame, roa_col: str, pe_col: str) -> pd.DataFrame:
     df_magic.reset_index(inplace=True, drop=True)
     
     return df_magic
+
+def filter_dataframe_based_on_selections(df: pd.DataFrame, magic_option: str, company_name: str) -> pd.DataFrame:
+    # Check if user wants to see the magic score. If yes, then calculate and display the magic score.
+    if magic_option == 'Yes':
+        df = magic_formula(df, roa_col = 'ROA', pe_col = 'PE')
+        # Enable the user to search for specific stocks
+        if company_name != '':
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
+                    FROM df
+                    WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
+                    ORDER BY "Magic Score" DESC;
+                    """
+        else:
+            # If the user doesn't search for a specific stock, disregard the WHERE clause.
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE, "Magic Score"
+                    FROM df
+                    ORDER BY "Magic Score" DESC;
+                    """
+    else:
+        if company_name != '':
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE
+                    FROM df
+                    WHERE LOWER(Name) LIKE LOWER('%{company_name}%')
+                    ORDER BY Name;
+                    """
+        else:
+            name_query = \
+                    f"""
+                    SELECT Name, Symbol, Sector, ROA, PE
+                    FROM df
+                    ORDER BY Name;
+                    """
+    
+    # Create and display the report in Streamlit
+    result = ps.sqldf(name_query, locals())
+    return result
