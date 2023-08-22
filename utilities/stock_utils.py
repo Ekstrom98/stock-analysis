@@ -1,3 +1,5 @@
+import pandas as pd
+import pandasql as ps
 def compute_ema(data, smoothing_factor, days_back):
     alpha = smoothing_factor/ (days_back + 1)
     ema = [round(data[0], 6)]

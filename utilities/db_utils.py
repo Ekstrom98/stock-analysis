@@ -1,20 +1,20 @@
-import psycopg2, configparser, csv
+import psycopg2, configparser, csv, os, subprocess
 
-def connect_to_database():
+def connect_to_database(database: str):
     config = configparser.ConfigParser()
     config.read('/Users/viktorekstrom/Desktop/Desktop/Projekt/stock-analysis/.cfg')
     try:
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(
-            dbname=config['POSTGRES']['POSTGRES_DB'],
+            dbname=config['POSTGRES'][f'{database.upper()}'],
             user=config['POSTGRES']['POSTGRES_USER'],
             password=config['POSTGRES']['POSTGRES_PASSWORD'],
             host=config['POSTGRES']['HOST']
         )
-        print("Connection successful.")
+        print(f"Connection to the {database} database was successful.")
         return connection
     except Exception as e:
-        print("Connection unsuccessful. Error: " + str(e))
+        print(f"Connection to the {database} database was unsuccessful. Error: " + str(e))
         return e 
     
 def check_if_symbol_exists_in_companies_table(symbol):
@@ -47,8 +47,8 @@ def look_up_dimension_keys_for_stock_data(cursor, stock_info: dict):
 
     return company_id[0], industry_id[0], sector_id[0]
 
-def write_all_tables_to_csv():
-    connection = connect_to_database()
+def write_all_oltp_tables_to_csv():
+    connection = connect_to_database('oltp')
     cursor = connection.cursor()
     config = configparser.ConfigParser()
     config.read('/Users/viktorekstrom/Desktop/Desktop/Projekt/stock-analysis/.cfg')
@@ -76,3 +76,34 @@ def write_all_tables_to_csv():
     connection.commit()
     cursor.close()
     connection.close()
+
+
+def copy_data_from_csv_to_db(csv_path, database, table_name):
+    # Read configuration
+    config = configparser.ConfigParser()
+    config.read('.cfg')
+    db_user = config['POSTGRES']['POSTGRES_USER']
+    db_password = config['POSTGRES']['POSTGRES_PASSWORD']
+    db_name = config['POSTGRES'][f'{database.upper()}']
+    host = config['POSTGRES']['HOST']
+
+    cmd = [
+        "psql",
+        "-h", host,
+        "-U", db_user,
+        "-d", db_name,
+        "-c",
+        f"\COPY {table_name} FROM '{csv_path}' DELIMITER ',' CSV HEADER;"
+    ]
+
+    env = os.environ.copy()
+    env["PGPASSWORD"] = db_password
+
+    result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print(f"Error: {result.stderr}")
+    else:
+        print(result.stdout)
+
+
