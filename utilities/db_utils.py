@@ -77,6 +77,36 @@ def write_all_oltp_tables_to_csv():
     cursor.close()
     connection.close()
 
+def write_all_olap_tables_to_csv():
+    connection = connect_to_database('olap')
+    cursor = connection.cursor()
+    config = configparser.ConfigParser()
+    config.read('/Users/viktorekstrom/Desktop/Desktop/Projekt/stock-analysis/.cfg')
+    tables = ['stock_analytics']
+    
+    for table in tables:
+        try:
+            cursor.execute(f"SELECT * FROM {table}")
+            rows = cursor.fetchall()
+            path = config['BACKUP'][f'{table.upper()}']
+            with open(path, 'w', newline='') as csvfile:
+
+                csv_writer = csv.writer(csvfile)
+            
+                # Write header (column names) to CSV
+                column_names = [desc[0] for desc in cursor.description]
+                csv_writer.writerow(column_names)
+                
+                # Write rows to CSV
+                csv_writer.writerows(rows)
+            print(f"CSV written to the path {path}.")
+        except Exception as e:
+            raise e
+        
+    connection.commit()
+    cursor.close()
+    connection.close()
+
 
 def copy_data_from_csv_to_db(csv_path, database, table_name):
     # Read configuration
@@ -105,5 +135,3 @@ def copy_data_from_csv_to_db(csv_path, database, table_name):
         print(f"Error: {result.stderr}")
     else:
         print(result.stdout)
-
-
