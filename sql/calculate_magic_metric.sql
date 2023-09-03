@@ -6,9 +6,12 @@ WITH screened_table AS (
 ), 
 magic_table AS (
     SELECT fetched_at, price, ema_34, ema_200, return_on_assets, return_on_equity, price_earnings_ratio,
-    market_capitalization, name, symbol,
+    market_capitalization, name, symbol, description,
     DENSE_RANK() OVER (ORDER BY price_earnings_ratio DESC) pe_score,
     DENSE_RANK() OVER (ORDER BY return_on_assets) roa_score
     FROM screened_table
 )
-SELECT *, (pe_score+roa_score) magic_score FROM magic_table;
+SELECT fetched_at, price, ema_34, ema_200, return_on_assets, return_on_equity, price_earnings_ratio,
+    market_capitalization, name, symbol, description,
+   (pe_score+roa_score) magic_score 
+FROM magic_table;
